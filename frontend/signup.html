@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro - Reconhecimento Facial</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="toast-notification" id="toast-signup">Cadastro realizado com sucesso!</div>
+
+    <a href="index.html" class="back-button" aria-label="Voltar para home">
+        <span>Home</span>
+    </a>
+
+    <div class="container config-container">
+        <div class="left-section config-left">
+            <div class="camera-container">
+                <div class="camera-wrapper">
+                    <video id="camera-stream" autoplay playsinline></video>
+                    <canvas id="camera-canvas" style="display: none;"></canvas>
+                    <img id="captured-image" style="display: none;" alt="Imagem capturada">
+                </div>
+
+                <div class="camera-buttons">
+                    <button class="camera-btn" id="capture-btn">Captura</button>
+                    <button class="camera-btn" id="upload-btn">Upload</button>
+                    <input type="file" id="file-input" accept="image/*" style="display: none;">
+                </div>
+
+                <button class="camera-btn secondary" id="reset-btn" style="display: none;">Nova Captura</button>
+            </div>
+        </div>
+
+        <div class="right-section config-right">
+            <div class="content">
+                <h1 class="title">Cadastro</h1>
+                <p class="subtitle">Preencha os dados e capture sua foto para realizar o cadastro no sistema</p>
+
+                <form id="signup-form" class="signup-form">
+                    <div class="form-group">
+                        <label for="name-input" class="form-label">Nome</label>
+                        <input type="text" id="name-input" class="form-input" placeholder="Digite seu nome completo" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Nivel de Seguranca</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="security-level" value="1" checked>
+                                <span>Nivel 1</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="security-level" value="2">
+                                <span>Nivel 2</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="security-level" value="3">
+                                <span>Nivel 3</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit-signup">Cadastrar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

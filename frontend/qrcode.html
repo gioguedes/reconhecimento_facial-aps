@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code - Configurar MFA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <a href="index.html" class="back-button" aria-label="Voltar para home">
+        <span>Home</span>
+    </a>
+
+    <div class="container">
+        <div class="right-section">
+            <div class="content">
+                <h1 class="title">QR Code MFA</h1>
+                <p class="subtitle">Escaneie o QR code abaixo com o Google Authenticator e guarde o código gerado.</p>
+
+                <div id="qr-card" class="qr-card" style="width:100%; max-width:520px; text-align:center;">
+                    <div class="qr-instructions" style="margin-bottom:20px; text-align:left;">
+                        <strong>Instruções:</strong>
+                        <ol style="margin:8px 0 0 18px;">
+                            <li>Abra o Google Authenticator no seu celular.</li>
+                            <li>Toque em "+" e selecione "Escanear código".</li>
+                            <li>Escaneie o QR code abaixo.</li>
+                            <li>Guarde o código gerado para usar no login.</li>
+                        </ol>
+                    </div>
+
+                    <div id="qr-image-wrapper" style="background:white; padding:20px; border-radius:12px; display:flex; align-items:center; justify-content:center;">
+                        <img id="qr-image" alt="QR Code MFA" style="max-width:100%; height:auto;" />
+                    </div>
+
+                    <div style="display:flex; gap:12px; margin-top:20px;">
+                        <button id="qr-done" class="btn btn-primary">Entendi, já configurei</button>
+                        <button id="qr-download" class="btn btn-tertiary">Baixar PNG</button>
+                    </div>
+
+                    <p id="qr-note" style="color:#64748b; margin-top:12px; font-size:14px;"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const qrData = sessionStorage.getItem('pending_qr');
+            const user = sessionStorage.getItem('pending_user');
+
+            const qrImage = document.getElementById('qr-image');
+            const doneBtn = document.getElementById('qr-done');
+            const downloadBtn = document.getElementById('qr-download');
+            const note = document.getElementById('qr-note');
+
+            if (!qrData) {
+                note.textContent = 'Nenhum QR code disponível. Retorne ao cadastro e tente novamente.';
+                if (qrImage) qrImage.style.display = 'none';
+                if (doneBtn) doneBtn.disabled = true;
+                if (downloadBtn) downloadBtn.disabled = true;
+                return;
+            }
+
+            qrImage.src = qrData;
+
+            doneBtn.addEventListener('click', function() {
+                // Clear pending data and redirect to home
+                sessionStorage.removeItem('pending_qr');
+                sessionStorage.removeItem('pending_user');
+                window.location.href = 'index.html';
+            });
+
+            downloadBtn.addEventListener('click', function() {
+                try {
+                    const link = document.createElement('a');
+                    link.href = qrData;
+                    link.download = (user ? user.replace(/\s+/g, '_') : 'qr_code') + '.png';
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                } catch (e) {
+                    note.textContent = 'Erro ao baixar a imagem.';
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

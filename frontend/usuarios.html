@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuários - Sistema de Reconhecimento Facial</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <a href="index.html" class="back-button" aria-label="Voltar para home">
+        <span>Home</span>
+    </a>
+
+    <div class="container">
+        <!-- Lado Esquerdo - Estatísticas -->
+        <div class="left-section">
+            <div class="users-sidebar">
+                <div class="users-header">
+                    <h1>Gerenciar Usuários</h1>
+                    <p class="subtitle">Visualize e gerencie usuários cadastrados</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-box level-1">
+                        <h3>Nível 1</h3>
+                        <p class="stat-number" id="level-1-count">0</p>
+                    </div>
+                    <div class="stat-box level-2">
+                        <h3>Nível 2</h3>
+                        <p class="stat-number" id="level-2-count">0</p>
+                    </div>
+                    <div class="stat-box level-3">
+                        <h3>Nível 3</h3>
+                        <p class="stat-number" id="level-3-count">0</p>
+                    </div>
+                    <div class="stat-box">
+                        <h3>Total</h3>
+                        <p class="stat-number" id="total-users">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lado Direito - Lista de Usuários -->
+        <div class="right-section">
+            <div class="users-container">
+                <div class="users-toolbar">
+                    <h2>Usuários Cadastrados</h2>
+                    <button class="btn-refresh" id="refresh-btn" title="Atualizar lista">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <polyline points="1 20 1 14 7 14"></polyline>
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <div id="users-loading" class="loading-state">
+                    <div class="spinner"></div>
+                    <p>Carregando usuários...</p>
+                </div>
+
+                <div id="users-list" class="users-list" style="overflow-y: auto; max-height: calc(100vh - 150px);"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmação de exclusão -->
+    <div id="delete-modal" class="delete-modal" style="display: none;">
+        <div class="delete-modal-content">
+            <h3>Confirmar Exclusão</h3>
+            <p>Tem certeza que deseja excluir o usuário <strong id="delete-user-name"></strong>?</p>
+            <p class="warning-text">Esta ação não pode ser desfeita!</p>
+            <div class="modal-buttons">
+                <button id="confirm-delete-btn" class="btn btn-danger">Excluir</button>
+                <button id="cancel-delete-btn" class="btn btn-secondary">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://127.0.0.1:5000/api';
+        let userToDelete = null;
+
+        // Carregar usuários ao iniciar
+        document.addEventListener('DOMContentLoaded', loadUsers);
+
+        // Carregar lista de usuários
+        async function loadUsers() {
+            const loadingEl = document.getElementById('users-loading');
+            const usersListEl = document.getElementById('users-list');
+
+            loadingEl.style.display = 'flex';
+            usersListEl.innerHTML = '';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/users`);
+                const data = await response.json();
+
+                if (data.success) {
+                    displayUsers(data.data.users);
+                    updateStats(data.data.users);
+                } else {
+                    usersListEl.innerHTML = '<p class="error-message">Erro ao carregar usuários.</p>';
+                }
+            } catch (error) {
+                usersListEl.innerHTML = '<p class="error-message">Erro ao conectar com servidor.</p>';
+            } finally {
+                loadingEl.style.display = 'none';
+            }
+        }
+
+        // Exibir usuários
+        function displayUsers(users) {
+            const usersListEl = document.getElementById('users-list');
+
+            if (users.length === 0) {
+                usersListEl.innerHTML = '<p class="empty-message">Nenhum usuário cadastrado.</p>';
+                return;
+            }
+
+            usersListEl.innerHTML = users.map(user => {
+                const enrolledDate = user.enrolled_date ? new Date(user.enrolled_date).toLocaleString('pt-BR') : 'N/A';
+                const lastAccess = user.last_access ? new Date(user.last_access).toLocaleString('pt-BR') : 'Nunca';
+
+                return `
+                    <div class="user-card level-${user.permission_level}">
+                        <div class="user-avatar-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        </div>
+                        <div class="user-info">
+                            <h3>${user.name}</h3>
+                            <span class="user-level-badge level-${user.permission_level}">Nível ${user.permission_level}</span>
+                        </div>
+                        <div class="user-details">
+                            <p><strong>Cadastrado:</strong> ${enrolledDate}</p>
+                            <p><strong>Último Acesso:</strong> ${lastAccess}</p>
+                            <p><strong>MFA:</strong> ${user.requires_mfa ? '✓ Ativo' : '✗ Inativo'}</p>
+                        </div>
+                        <div class="user-actions">
+                            <button class="btn-delete" onclick="confirmDelete('${user.name}')" title="Excluir usuário">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Atualizar estatísticas
+        function updateStats(users) {
+            const level1 = users.filter(u => u.permission_level === 1).length;
+            const level2 = users.filter(u => u.permission_level === 2).length;
+            const level3 = users.filter(u => u.permission_level === 3).length;
+
+            document.getElementById('level-1-count').textContent = level1;
+            document.getElementById('level-2-count').textContent = level2;
+            document.getElementById('level-3-count').textContent = level3;
+            document.getElementById('total-users').textContent = users.length;
+        }
+
+        // Confirmar exclusão
+        function confirmDelete(username) {
+            userToDelete = username;
+            document.getElementById('delete-user-name').textContent = username;
+            document.getElementById('delete-modal').style.display = 'flex';
+        }
+
+        // Cancelar exclusão
+        document.getElementById('cancel-delete-btn').addEventListener('click', () => {
+            document.getElementById('delete-modal').style.display = 'none';
+            userToDelete = null;
+        });
+
+        // Executar exclusão
+        document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
+            if (!userToDelete) return;
+
+            const btn = document.getElementById('confirm-delete-btn');
+            btn.disabled = true;
+            btn.textContent = 'Excluindo...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/users/${encodeURIComponent(userToDelete)}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(`Usuário ${userToDelete} excluído com sucesso!`);
+                    document.getElementById('delete-modal').style.display = 'none';
+                    loadUsers();
+                } else {
+                    alert('Erro ao excluir usuário: ' + (data.error || data.message));
+                }
+            } catch (error) {
+                alert('Erro ao conectar com servidor.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Excluir';
+                userToDelete = null;
+            }
+        });
+
+        // Botão de refresh
+        document.getElementById('refresh-btn').addEventListener('click', loadUsers);
+    </script>
+</body>
+</html>

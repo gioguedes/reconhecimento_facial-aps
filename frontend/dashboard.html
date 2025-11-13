@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Sistema de Reconhecimento Facial</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .dashboard-container {
+            max-width: 600px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="image-container dashboard-info">
+            <div class="dashboard-header">
+                <div class="user-avatar">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+                <h1 id="user-name">Carregando...</h1>
+                <p id="user-level" class="user-level-badge">Nível 0</p>
+            </div>
+
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <h3>Status</h3>
+                    <p class="stat-value success">Autenticado</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Último Acesso</h3>
+                    <p class="stat-value" id="last-access">Agora</p>
+                </div>
+                <div class="stat-card">
+                    <h3>MFA</h3>
+                    <p class="stat-value" id="mfa-status">-</p>
+                </div>
+            </div>
+
+            <div class="dashboard-message">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="check-icon">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <p>Acesso concedido com sucesso!</p>
+                <p class="small-text">Seu reconhecimento facial foi validado e você está autenticado no sistema.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Extrair nome do usuário da URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const username = urlParams.get('user');
+
+        if (!username) {
+            alert('Acesso não autorizado. Faça login primeiro.');
+            window.location.href = 'signin.html';
+        } else {
+            document.getElementById('user-name').textContent = username;
+
+            // Simular dados (em produção, buscar do backend)
+            const userLevel = localStorage.getItem('user_level') || 1;
+            const hasMFA = userLevel >= 2;
+
+            document.getElementById('user-level').textContent = `Nível ${userLevel}`;
+            document.getElementById('mfa-status').textContent = hasMFA ? 'Ativado' : 'Desativado';
+
+            // Adicionar classe de nível
+            const levelBadge = document.getElementById('user-level');
+            levelBadge.classList.add(`level-${userLevel}`);
+        }
+    </script>
+</body>
+</html>

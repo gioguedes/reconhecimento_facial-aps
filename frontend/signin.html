@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Reconhecimento Facial</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Botao Home -->
+    <a href="index.html" class="back-button" aria-label="Voltar para home">
+        <span>Home</span>
+    </a>
+
+    <div class="container config-container">
+        <!-- Lado Esquerdo - Camera -->
+        <div class="left-section config-left">
+            <div class="camera-container">
+                <div class="camera-wrapper">
+                    <video id="camera-stream-signin" autoplay playsinline></video>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lado Direito - Informacoes -->
+        <div class="right-section config-right">
+            <div class="content">
+                <h1 class="title">Autenticação Facial</h1>
+                <p class="subtitle">Posicione-se em frente à câmera para realizar o reconhecimento facial. O sistema irá autenticá-lo automaticamente quando detectar seu rosto.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

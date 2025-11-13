@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+venv/
+.venv/
+env/
+ENV/
+
+# Dados sensíveis - NUNCA commitar!
+backend/database2/
+backend/database/
+backend/logs/
+*.key
+encryption.key
+*_encrypted.*
+
+# Modelos de Deep Learning (muito grandes)
+backend/models/*.caffemodel
+backend/models/*.t7
+backend/models/*.pb
+backend/models/*.pth
+
+# Arquivos de configuração com dados sensíveis
+backend/config.json
+backend/mfa_secrets_encrypted.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# Temporários
+*.tmp
+*.temp
+.cache/

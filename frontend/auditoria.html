@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auditoria - Sistema de Reconhecimento Facial</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .logs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            max-width: 100%;
+        }
+
+        @media (min-width: 1200px) {
+            .logs-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .log-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 2px solid #e2e8f0;
+        }
+
+        .log-card:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .log-card.success {
+            border-left: 4px solid #10b981;
+        }
+
+        .log-card.error {
+            border-left: 4px solid #ef4444;
+        }
+
+        .log-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .log-type {
+            font-weight: 600;
+            font-size: 14px;
+            color: #1e293b;
+            text-transform: capitalize;
+        }
+
+        .log-time {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .log-card-body {
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .log-card-body p {
+            margin: 8px 0;
+            color: #475569;
+        }
+
+        .log-card-body strong {
+            color: #1e293b;
+            font-weight: 600;
+        }
+
+        .decision {
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .decision.success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .decision.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .log-card-footer {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e2e8f0;
+            font-size: 11px;
+            color: #94a3b8;
+            font-family: monospace;
+        }
+
+        .integrity-status.valid {
+            background: #dcfce7 !important;
+            color: #166534;
+        }
+
+        .integrity-status.invalid {
+            background: #fee2e2 !important;
+            color: #991b1b;
+        }
+
+        .btn-refresh:hover {
+            background: #000000 !important;
+            border-color: #B2B2B2 !important;
+        }
+
+        .btn-refresh:hover svg {
+            stroke: #FFFFFF;
+        }
+
+        @media (max-width: 768px) {
+            .logs-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-button" aria-label="Voltar para home">
+        <span>Home</span>
+    </a>
+
+    <div class="container">
+        <!-- Lado Esquerdo - Filtros -->
+        <div class="left-section">
+            <div class="content">
+                <h1 class="title">Auditoria</h1>
+                <p class="subtitle">Filtrar logs de acesso</p>
+
+                <div class="stats-grid" style="margin-bottom: 30px;">
+                    <div class="stat-box">
+                        <h3>Total de Logs</h3>
+                        <p class="stat-number" id="total-logs">0</p>
+                    </div>
+                    <div class="stat-box">
+                        <h3>Últimas 24h</h3>
+                        <p class="stat-number" id="logs-24h">0</p>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label for="filter-user" class="form-label">Filtrar por Usuário</label>
+                    <input type="text" id="filter-user" class="form-input" placeholder="Digite o nome do usuário..." />
+                </div>
+
+                <button class="btn btn-primary" id="apply-filter-btn" style="width: 100%; margin-bottom: 10px;">Aplicar Filtro</button>
+                <button class="btn btn-secondary" id="clear-filter-btn" style="width: 100%;">Limpar Filtro</button>
+            </div>
+        </div>
+
+        <!-- Lado Direito - Lista de Logs -->
+        <div class="right-section">
+            <div class="content">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+                    <div style="flex: 1;">
+                        <h1 class="title">Registros</h1>
+                        <p class="subtitle" style="margin-bottom: 15px;">Histórico de acessos ao sistema</p>
+
+                        <div class="pagination" id="pagination" style="display: flex; align-items: center; gap: 15px;">
+                            <button class="btn btn-secondary" id="prev-btn" disabled style="padding: 8px 16px;">Anterior</button>
+                            <span id="page-info" style="font-weight: 600; color: #1e293b; font-size: 14px;">Página 1</span>
+                            <button class="btn btn-secondary" id="next-btn" style="padding: 8px 16px;">Próxima</button>
+                        </div>
+                    </div>
+                    <button class="btn-refresh" id="refresh-btn" title="Atualizar logs" style="padding: 12px; border-radius: 8px; background: #FFFFFF; border: 2px solid #B2B2B2; cursor: pointer; transition: all 0.3s;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <polyline points="1 20 1 14 7 14"></polyline>
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <div id="logs-loading" class="loading-state" style="display: none; text-align: center; padding: 40px;">
+                    <div class="spinner"></div>
+                    <p>Carregando logs...</p>
+                </div>
+
+                <div id="logs-list" class="logs-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://127.0.0.1:5000/api';
+        let currentPage = 0;
+        const logsPerPage = 4;
+        let currentFilter = null;
+        let totalLogs = 0;
+
+        // Carregar logs ao iniciar
+        document.addEventListener('DOMContentLoaded', function() {
+            loadLogs();
+            verifyIntegrity();
+        });
+
+        // Verificar integridade
+        async function verifyIntegrity() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/audit/verify-integrity`);
+                const data = await response.json();
+
+                const statusEl = document.getElementById('integrity-status');
+                const textEl = document.getElementById('integrity-text');
+
+                if (data.success && data.data.integrity_valid) {
+                    statusEl.classList.add('valid');
+                    statusEl.classList.remove('invalid');
+                    textEl.textContent = '✓ Integridade verificada';
+                } else {
+                    statusEl.classList.add('invalid');
+                    statusEl.classList.remove('valid');
+                    textEl.textContent = '✗ Integridade comprometida!';
+                }
+            } catch (error) {
+                console.error('Erro ao verificar integridade:', error);
+            }
+        }
+
+        // Carregar logs
+        async function loadLogs() {
+            const loadingEl = document.getElementById('logs-loading');
+            const logsListEl = document.getElementById('logs-list');
+
+            loadingEl.style.display = 'flex';
+            logsListEl.innerHTML = '';
+
+            try {
+                const offset = currentPage * logsPerPage;
+                let url = `${API_BASE_URL}/audit/logs?limit=${logsPerPage}&offset=${offset}`;
+
+                if (currentFilter) {
+                    url += `&user_id=${encodeURIComponent(currentFilter)}`;
+                }
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.success) {
+                    totalLogs = data.data.total;
+                    displayLogs(data.data.logs);
+                    updatePagination();
+                    updateStats(data.data);
+                } else {
+                    logsListEl.innerHTML = '<p class="error-message">Erro ao carregar logs.</p>';
+                }
+            } catch (error) {
+                console.error('Erro ao carregar logs:', error);
+                logsListEl.innerHTML = '<p class="error-message">Erro ao conectar com servidor.</p>';
+            } finally {
+                loadingEl.style.display = 'none';
+            }
+        }
+
+        // Exibir logs
+        function displayLogs(logs) {
+            const logsListEl = document.getElementById('logs-list');
+
+            if (logs.length === 0) {
+                logsListEl.innerHTML = '<p style="text-align: center; color: #64748b; padding: 40px;">Nenhum log encontrado.</p>';
+                return;
+            }
+
+            logsListEl.innerHTML = logs.map(log => {
+                const timestamp = new Date(log.timestamp).toLocaleString('pt-BR');
+                const decisionClass = log.decision === 'granted' ? 'success' : 'error';
+
+                return `
+                    <div class="log-card ${decisionClass}">
+                        <div class="log-card-header">
+                            <span class="log-type">${log.event_type.replace(/_/g, ' ')}</span>
+                            <span class="log-time">${timestamp}</span>
+                        </div>
+                        <div class="log-card-body">
+                            <p><strong>Usuário:</strong> ${log.user_id || 'N/A'}</p>
+                            <p><strong>Decisão:</strong> <span class="decision ${decisionClass}">${log.decision}</span></p>
+                            ${log.confidence_score > 0 ? `<p><strong>Confiança:</strong> ${(log.confidence_score * 100).toFixed(2)}%</p>` : ''}
+                            <p><strong>Motivo:</strong> ${log.reason}</p>
+                            ${log.mfa_used ? '<p><strong>MFA:</strong> ✓ Utilizado</p>' : ''}
+                        </div>
+                        <div class="log-card-footer">
+                            Hash: ${log.hash.substring(0, 16)}...
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Atualizar estatísticas
+        function updateStats(data) {
+            document.getElementById('total-logs').textContent = data.total;
+
+            // Contar logs das últimas 24h
+            const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
+            const recent = data.logs.filter(log => {
+                const logDate = new Date(log.timestamp).getTime();
+                return logDate > oneDayAgo;
+            }).length;
+
+            document.getElementById('logs-24h').textContent = recent;
+        }
+
+        // Atualizar paginação
+        function updatePagination() {
+            const totalPages = Math.ceil(totalLogs / logsPerPage);
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const pageInfo = document.getElementById('page-info');
+
+            prevBtn.disabled = currentPage === 0;
+            nextBtn.disabled = currentPage >= totalPages - 1 || totalLogs === 0;
+
+            pageInfo.textContent = `Página ${currentPage + 1} de ${totalPages || 1}`;
+        }
+
+        // Botões de paginação
+        document.getElementById('prev-btn').addEventListener('click', () => {
+            if (currentPage > 0) {
+                currentPage--;
+                loadLogs();
+            }
+        });
+
+        document.getElementById('next-btn').addEventListener('click', () => {
+            const totalPages = Math.ceil(totalLogs / logsPerPage);
+            if (currentPage < totalPages - 1) {
+                currentPage++;
+                loadLogs();
+            }
+        });
+
+        // Botão de refresh
+        document.getElementById('refresh-btn').addEventListener('click', () => {
+            loadLogs();
+            verifyIntegrity();
+        });
+
+        // Aplicar filtro
+        document.getElementById('apply-filter-btn').addEventListener('click', () => {
+            const filterInput = document.getElementById('filter-user');
+            currentFilter = filterInput.value.trim() || null;
+            currentPage = 0;
+            loadLogs();
+        });
+
+        // Limpar filtro
+        document.getElementById('clear-filter-btn').addEventListener('click', () => {
+            document.getElementById('filter-user').value = '';
+            currentFilter = null;
+            currentPage = 0;
+            loadLogs();
+        });
+    </script>
+</body>
+</html>
