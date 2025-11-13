@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações - Reconhecimento Facial</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="toast-notification" id="toast">Salvo com sucesso!</div>
+
+    <a href="index.html" class="back-button" aria-label="Voltar para home">
+        <span>Home</span>
+    </a>
+
+    <div class="container config-container">
+        <div class="left-section config-left">
+            <div class="sliders-container">
+                <div class="slider-group">
+                    <label for="slider-a" class="slider-label">Nivel 1 (permissão geral)</label>
+                    <input type="range" id="slider-a" class="slider" min="0" max="100" value="50">
+                    <span class="slider-value" id="value-a">50</span>
+                </div>
+
+                <div class="slider-group">
+                    <label for="slider-b" class="slider-label">Nivel 2 (acesso restito)</label>
+                    <input type="range" id="slider-b" class="slider" min="0" max="100" value="50">
+                    <span class="slider-value" id="value-b">50</span>
+                </div>
+
+                <div class="slider-group">
+                    <label for="slider-c" class="slider-label">Nivel 3 (acesso exclusivo)</label>
+                    <input type="range" id="slider-c" class="slider" min="0" max="100" value="50">
+                    <span class="slider-value" id="value-c">50</span>
+                </div>
+
+                <!-- Botão Salvar -->
+                <button class="save-button">Salvar</button>
+            </div>
+        </div>
+
+        <div class="right-section config-right">
+            <div class="content">
+                <h1 class="title">Configurações.</h1>
+                <p class="subtitle">Ajuste os parâmetros do sistema de reconhecimento facial de acordo com suas necessidades</p>
+                <p class="subtitle">Deslize os controles ao lado para definir os níveis de confiabilidade para cada nível de segurança.</p>
+                <p class="subtitle">Níveis mais altos aumentam a precisão, mas podem reduzir a velocidade de reconhecimento.</p>
+                <p class="subtitle">Após ajustar os níveis, clique em "Salvar" para aplicar as novas configurações.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
